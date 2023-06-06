@@ -1,4 +1,4 @@
-import React, { useCallback , useRef } from 'react';
+import React, { useCallback , useRef , useState , useEffect} from 'react';
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -7,6 +7,7 @@ import ReactFlow, {
   useEdgesState,
   updateEdge,
   addEdge,
+  Panel
 } from 'reactflow';
 import { MarkerType, Position } from 'reactflow';
 
@@ -219,6 +220,32 @@ export default function Flows_Five() {
 
       const defaultViewport = { x: 0, y: 0, zoom: 0.5 };
 
+
+      const [nodeName, setNodeName] = useState('Click Node to Change');
+      const [nodeID, setNodeID] = useState(null);
+
+      useEffect(() => {
+        setNodes((nds) =>
+          nds.map((node) => {
+            if (node.id === nodeID) {
+              // it's important that you create a new object here
+              // in order to notify react flow about the change
+              node.data = {
+                ...node.data,
+                label: nodeName,
+              };
+            }
+    
+            return node;
+          })
+        );
+      }, [nodeName, setNodes]);
+
+      const onNodeClick = (event, node) => {
+         setNodeName(node.data.label)
+         setNodeID(node.id)
+      };
+
   return (
     <div style={{ width: '38vw', height: '60vh'  }}>
       <ReactFlow
@@ -234,13 +261,26 @@ export default function Flows_Five() {
          fitView
          defaultViewport={defaultViewport}
          attributionPosition="top-right"
+         onNodeClick={onNodeClick}
       >
         <Controls />
         {/* <MiniMap /> */}
-        <Background variant="dots" gap={30} size={5} />
+        {/* <Background variant="dots" gap={30} size={5} /> */}
         <div className='download-image'>
         <DownloadButton />
         </div>
+        <div className="updatenode__controls">
+        <label>label:</label>
+        <input value={nodeName} onChange={(evt) => setNodeName(evt.target.value)} />
+        </div>
+
+
+        {/* <Panel position="bottom-right">
+        <button >save</button>
+        <button  >restore</button>
+        <button  >add node</button>
+      </Panel> */}
+
       </ReactFlow>
     </div>
   );
